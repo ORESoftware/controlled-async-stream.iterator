@@ -3,7 +3,7 @@
 import { Observable, from, zip as rxZip, concat as rxConcat } from 'rxjs';
 import { map as rxMap, filter as rxFilter, take as rxTake, skip as rxSkip, tap as rxTap } from 'rxjs/operators';
 
-class AsyncLazyStream<T> {
+export class AsyncLazyStream<T> {
   private pipeline: Array<(input: AsyncIterable<any>) => AsyncIterable<any>> = [];
 
   constructor(private source: AsyncIterable<T>) {}

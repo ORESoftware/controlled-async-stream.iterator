@@ -2,8 +2,10 @@
 
 import { Observable, from, zip as rxZip, concat as rxConcat } from 'rxjs';
 import { map as rxMap, filter as rxFilter, take as rxTake, skip as rxSkip, tap as rxTap } from 'rxjs/operators';
+import {AsyncLazyStream} from "../async-lazy-stream/async-lazy-stream";
+import {AsyncSequence} from "../async-sequence/async-sequence";
 
-class SyncSequence<T> {
+export class SyncSequence<T> {
   private iterable: Iterable<T>;
 
   constructor(iterable: Iterable<T>) {
@@ -64,10 +66,20 @@ class SyncSequence<T> {
     return from(this.iterable);
   }
 
+  toAsync(): AsyncSequence<T> {
+    return new AsyncSequence((async function* (iter) {
+      for (const item of iter) {
+        yield item;
+      }
+    })(this.iterable));
+  }
+
   // Make SyncSequence iterable
   [Symbol.iterator](): Iterator<T> {
     return this.iterable[Symbol.iterator]();
   }
+
+
 }
 
 function* flatten<T>(iter: Iterable<Iterable<T>>): IterableIterator<T> {

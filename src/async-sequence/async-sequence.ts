@@ -2,9 +2,10 @@
 
 import { Observable, from, zip as rxZip, concat as rxConcat } from 'rxjs';
 import { map as rxMap, filter as rxFilter, take as rxTake, skip as rxSkip, tap as rxTap } from 'rxjs/operators';
+import {SyncSequence} from "../sync-sequence/sync-sequence";
 
 
-class AsyncSequence<T> implements AsyncIterable<T> {
+export class AsyncSequence<T> implements AsyncIterable<T> {
   private iterable: AsyncIterable<T>;
 
   constructor(iterable: AsyncIterable<T>) {
@@ -56,6 +57,14 @@ class AsyncSequence<T> implements AsyncIterable<T> {
     initialValue: U
   ): Promise<U> {
     return asyncReduce(this.iterable, reducer, initialValue);
+  }
+
+  async toSync(): Promise<SyncSequence<T>> {
+    const results: T[] = [];
+    for await (const item of this) {
+      results.push(item);
+    }
+    return new SyncSequence(results);
   }
 
   [Symbol.asyncIterator](): AsyncIterator<T> {
