@@ -54,6 +54,11 @@ class SyncSequence<T> {
     return new SyncSequence(tap(this.iterable, fn));
   }
 
+  // Flatten method
+  flatten<U>(): SyncSequence<U> {
+    return new SyncSequence(flatten(this.iterable as Iterable<Iterable<U>>));
+  }
+
   // RxJS interop: convert to Observable
   toObservable(): Observable<T> {
     return from(this.iterable);
@@ -62,6 +67,12 @@ class SyncSequence<T> {
   // Make SyncSequence iterable
   [Symbol.iterator](): Iterator<T> {
     return this.iterable[Symbol.iterator]();
+  }
+}
+
+function* flatten<T>(iter: Iterable<Iterable<T>>): IterableIterator<T> {
+  for (const sub of iter) {
+    yield* sub;
   }
 }
 
