@@ -87,3 +87,5 @@ async function main() {
 
 // Start the process
 main();
+
+export {}
