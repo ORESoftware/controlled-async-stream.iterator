@@ -86,16 +86,15 @@ async function* syncFlatten(iter: Iterable<any>, depth: number = Infinity): Asyn
 
 async function* asyncFlatten(iter: AsyncIterable<any>, depth: number = Infinity): AsyncIterableIterator<any> {
   for await (const item of iter) {
-    if (depth > 0 && item && typeof item[Symbol.asyncIterator] === 'function') {
+    if (depth > 0 && isAsyncIterable(item)) {
       yield* asyncFlatten(item, depth - 1);
-    } else if(depth > 0 && item && typeof item[Symbol.iterator] === 'function') {
+    } else if(depth > 0 && isSyncIterable(item)) {
       yield* syncFlatten(item, depth - 1);
     } else {
       yield item;
     }
   }
 }
-
 
 // Helper function for asyncReduce
 async function asyncReduce<T, U>(
@@ -121,10 +120,12 @@ async function* asyncFlatMap<T, U>(
       for await (const subItem of subIterable) {
         yield subItem;
       }
-    } else {
+    } else if(isSyncIterable(subIterable)){
       for (const subItem of subIterable) {
         yield subItem;
       }
+    } else {
+      yield  subIterable as any;
     }
   }
 }
@@ -133,6 +134,12 @@ async function* asyncFlatMap<T, U>(
 function isAsyncIterable<T>(obj: any): obj is AsyncIterable<T> {
   return obj && typeof obj[Symbol.asyncIterator] === 'function';
 }
+
+// Helper to check if something is AsyncIterable
+function isSyncIterable<T>(obj: any): obj is Iterable<T> {
+  return obj && typeof obj[Symbol.iterator] === 'function';
+}
+
 
 // Helper for asyncMap
 async function* asyncMap<T, U>(
